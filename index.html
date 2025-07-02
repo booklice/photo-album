@@ -52,7 +52,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       const getData = async () => {
-        const res = await fetch(`/data/images.json`);
+        const res = await fetch(`./data/images.json`);
         const data = await res.json();
         return data;
       };
