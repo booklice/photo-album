@@ -30,6 +30,10 @@ jobs:
         run: |
           git config --local user.email "contact@youngjo.com"
           git config --local user.name "booklice"
-          git add data.json
-          git diff --staged --quiet || git commit -m "Update images data"
-          git push
+          if [ -f data/images.json ]; then
+            git add data/images.json
+            git diff --staged --quiet || git commit -m "Update images data"
+            git push
+          else
+            echo "⚠️ data/images.json not found, skipping commit."
+          fi
