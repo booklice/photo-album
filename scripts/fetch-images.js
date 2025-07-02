@@ -15,7 +15,7 @@ async function fetchAllImages() {
   do {
     const result = await cloudinary.search
       .expression("folder:coffee")
-      .sort_by([["created_at", "desc"]])
+      .sort_by([["created_at", "desc"]]) // ← 이렇게 수정
       .max_results(500)
       .next_cursor(nextCursor)
       .execute();
@@ -33,8 +33,13 @@ async function fetchAllImages() {
     created_at: img.created_at,
   }));
 
+  // data 폴더가 없으면 생성
+  if (!fs.existsSync("data")) {
+    fs.mkdirSync("data");
+  }
+
   // JSON 파일로 저장
-  fs.writeFileSync("/data.json", JSON.stringify(imageData, null, 2));
+  fs.writeFileSync("data/images.json", JSON.stringify(imageData, null, 2));
   console.log(`총 ${imageData.length}개 이미지 업데이트 완료`);
 }
 
