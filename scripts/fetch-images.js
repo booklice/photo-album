@@ -15,7 +15,7 @@ async function fetchAllImages() {
   do {
     const result = await cloudinary.search
       .expression("folder:coffee")
-      .sort_by([["created_at", "desc"]]) // ← 이렇게 수정
+      .sort_by("created_at", "desc") // ✅ 수정된 부분
       .max_results(500)
       .next_cursor(nextCursor)
       .execute();
