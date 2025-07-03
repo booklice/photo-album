@@ -1,37 +1,40 @@
-[
-  {
-    "public_id": "IMG_9278",
-    "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443971/IMG_9278.jpg",
-    "width": 3024,
-    "height": 4032,
-    "created_at": "2025-07-02T08:12:51+00:00"
-  },
-  {
-    "public_id": "IMG_9275",
-    "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443970/IMG_9275.jpg",
-    "width": 3024,
-    "height": 4032,
-    "created_at": "2025-07-02T08:12:50+00:00"
-  },
-  {
-    "public_id": "IMG_9274",
-    "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443969/IMG_9274.jpg",
-    "width": 3024,
-    "height": 4032,
-    "created_at": "2025-07-02T08:12:49+00:00"
-  },
-  {
-    "public_id": "IMG_9283",
-    "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443966/IMG_9283.jpg",
-    "width": 3024,
-    "height": 4032,
-    "created_at": "2025-07-02T08:12:46+00:00"
-  },
-  {
-    "public_id": "IMG_9280",
-    "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443966/IMG_9280.jpg",
-    "width": 3024,
-    "height": 4032,
-    "created_at": "2025-07-02T08:12:46+00:00"
-  }
-]
+{
+  "updated_at": "2025-07-03T06:52:07.871Z",
+  "images": [
+    {
+      "public_id": "IMG_9278",
+      "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443971/IMG_9278.jpg",
+      "width": 3024,
+      "height": 4032,
+      "created_at": "2025-07-02T08:12:51+00:00"
+    },
+    {
+      "public_id": "IMG_9275",
+      "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443970/IMG_9275.jpg",
+      "width": 3024,
+      "height": 4032,
+      "created_at": "2025-07-02T08:12:50+00:00"
+    },
+    {
+      "public_id": "IMG_9274",
+      "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443969/IMG_9274.jpg",
+      "width": 3024,
+      "height": 4032,
+      "created_at": "2025-07-02T08:12:49+00:00"
+    },
+    {
+      "public_id": "IMG_9283",
+      "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443966/IMG_9283.jpg",
+      "width": 3024,
+      "height": 4032,
+      "created_at": "2025-07-02T08:12:46+00:00"
+    },
+    {
+      "public_id": "IMG_9280",
+      "url": "https://res.cloudinary.com/dvouxokwn/image/upload/v1751443966/IMG_9280.jpg",
+      "width": 3024,
+      "height": 4032,
+      "created_at": "2025-07-02T08:12:46+00:00"
+    }
+  ]
+}
