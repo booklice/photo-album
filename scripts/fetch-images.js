@@ -38,8 +38,13 @@ async function fetchAllImages() {
     fs.mkdirSync("data");
   }
 
-  // JSON 파일로 저장
-  fs.writeFileSync("data/images.json", JSON.stringify(imageData, null, 2));
+  const payload = {
+    updated_at: new Date().toISOString(),
+    images: imageData
+  };
+
+  fs.writeFileSync('data/images.json', JSON.stringify(payload, null, 2));
+
   console.log(`총 ${imageData.length}개 이미지 업데이트 완료`);
 }
 
