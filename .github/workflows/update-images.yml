@@ -3,10 +3,9 @@
 name: Update Cloudinary Images
 
 on:
+  workflow_dispatch:
   schedule:
-      - cron: "*/5 * * * *"
-    # - cron: "0 6 * * *" # 매일 오전 6시
-  workflow_dispatch: # 수동 실행도 가능
+    - cron: "*/5 * * * *"  # Runs every 5 minutes for testing
 
 permissions:
   contents: write  # ✅ push 하기 위해 꼭 필요
