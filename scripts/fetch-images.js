@@ -2,78 +2,78 @@
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 
+const DATA_PATH = "data/images.json";
+const FOLDER = "coffee";
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-async function fetchAllImages() {
-  let publicIds = [];
+const fetchAllImages = async () => {
+  const existing = fs.existsSync(DATA_PATH)
+    ? JSON.parse(fs.readFileSync(DATA_PATH, "utf-8")).images || []
+    : [];
+
+  const existingIds = new Set(existing.map((img) => img.public_id));
+  const allIds = [];
   let nextCursor = null;
 
-  console.log("🔍 Cloudinary에서 이미지 목록 가져오는 중...");
+  console.log("이미지 목록 가져오는 중...");
 
   do {
-    const result = await cloudinary.search
-      .expression("folder:coffee")
+    const res = await cloudinary.search
+      .expression(`folder:${FOLDER}`)
       .sort_by("created_at", "desc")
       .max_results(100)
       .next_cursor(nextCursor)
       .execute();
 
-    publicIds.push(...result.resources.map((r) => r.public_id));
-    nextCursor = result.next_cursor;
+    allIds.push(...res.resources.map((r) => r.public_id));
+    nextCursor = res.next_cursor;
   } while (nextCursor);
 
-  console.log(`총 ${publicIds.length}개 이미지 발견`);
+  const newIds = allIds.filter((id) => !existingIds.has(id));
+  console.log(`새 이미지 ${newIds.length}개`);
 
-  const imageData = [];
+  const newImages = [];
 
-  for (const publicId of publicIds) {
+  for (const id of newIds) {
     try {
-      const result = await cloudinary.api.resource(publicId, {
+      const res = await cloudinary.api.resource(id, {
         image_metadata: true,
         metadata: true,
       });
 
-      const dateTimeExif = result.image_metadata?.DateTimeOriginal || result.image_metadata?.DateTime;
-      const structuredTakenAt = result.metadata?.taken_at;
+      const exif = res.image_metadata?.DateTimeOriginal || res.image_metadata?.DateTime;
+      const takenAt = res.metadata?.taken_at || (exif?.replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3").replace(" ", "T") || null);
 
-      let takenAt = null;
-
-      if (structuredTakenAt) {
-        takenAt = structuredTakenAt;
-      } else if (dateTimeExif) {
-        // EXIF: "2025:05:31 08:33:45" → ISO8601
-        takenAt = dateTimeExif.replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3").replace(" ", "T");
-      }
-
-      imageData.push({
-        public_id: result.public_id,
-        url: result.secure_url,
-        width: result.width,
-        height: result.height,
-        created_at: result.created_at,
-        taken_at: takenAt,
+      newImages.push({
+        public_id: res.public_id,
+        url: res.secure_url,
+        width: res.width,
+        height: res.height,
+        created_at: res.created_at,
+        taken_at,
       });
 
-      console.log(`📝 ${publicId} → taken_at: ${takenAt || "없음"}`);
+      console.log(`${id} → taken_at: ${takenAt || "없음"}`);
     } catch (err) {
-      console.error(`⚠️ ${publicId} 메타데이터 조회 실패:`, err.message);
+      console.error(`${id} 실패:`, err.message);
     }
   }
 
   if (!fs.existsSync("data")) fs.mkdirSync("data");
 
-  const payload = {
+  fs.writeFileSync(DATA_PATH, JSON.stringify({
     updated_at: new Date().toISOString(),
-    images: imageData,
-  };
+    images: [...newImages, ...existing],
+  }, null, 2));
 
-  fs.writeFileSync("data/images.json", JSON.stringify(payload, null, 2));
-  console.log(`총 ${imageData.length}개 이미지 저장 완료`);
+  console.log(`저장 완료: 총 ${newImages.length}개 추가 (전체 ${newImages.length + existing.length}개)`);
 }
 
 fetchAllImages().catch(console.error);
+
 
