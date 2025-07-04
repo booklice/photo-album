@@ -9,53 +9,71 @@ cloudinary.config({
 });
 
 async function fetchAllImages() {
-  let allImages = [];
+  let publicIds = [];
   let nextCursor = null;
+
+  console.log("🔍 Cloudinary에서 이미지 목록 가져오는 중...");
 
   do {
     const result = await cloudinary.search
       .expression("folder:coffee")
-      .with_field("image_metadata")
       .sort_by("created_at", "desc")
-      .max_results(500)
+      .max_results(100)
       .next_cursor(nextCursor)
       .execute();
 
-    allImages = [...allImages, ...result.resources];
+    publicIds.push(...result.resources.map((r) => r.public_id));
     nextCursor = result.next_cursor;
   } while (nextCursor);
 
-  const imageData = allImages.map((img) => {
-    const takenAtRaw = img.image_metadata?.DateTime; // "2025:05:31 08:33:45"
-    let takenAt = null;
+  console.log(`총 ${publicIds.length}개 이미지 발견`);
 
-    if (takenAtRaw) {
-      // "2025:05:31 08:33:45" -> "2025-05-31T08:33:45"
-      takenAt = takenAtRaw.replace(/:/, '-').replace(/:/, '-').replace(" ", "T");
+  const imageData = [];
+
+  for (const publicId of publicIds) {
+    try {
+      const result = await cloudinary.api.resource(publicId, {
+        image_metadata: true,
+        metadata: true,
+      });
+
+      const dateTimeExif = result.image_metadata?.DateTimeOriginal || result.image_metadata?.DateTime;
+      const structuredTakenAt = result.metadata?.taken_at;
+
+      let takenAt = null;
+
+      if (structuredTakenAt) {
+        takenAt = structuredTakenAt;
+      } else if (dateTimeExif) {
+        // EXIF: "2025:05:31 08:33:45" → ISO8601
+        takenAt = dateTimeExif.replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3").replace(" ", "T");
+      }
+
+      imageData.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+        width: result.width,
+        height: result.height,
+        created_at: result.created_at,
+        taken_at: takenAt,
+      });
+
+      console.log(`📝 ${publicId} → taken_at: ${takenAt || "없음"}`);
+    } catch (err) {
+      console.error(`⚠️ ${publicId} 메타데이터 조회 실패:`, err.message);
     }
-
-    return {
-      public_id: img.public_id,
-      url: img.secure_url,
-      width: img.width,
-      height: img.height,
-      created_at: img.created_at,
-      taken_at: takenAt,
-    };
-  });
-
-  if (!fs.existsSync("data")) {
-    fs.mkdirSync("data");
   }
+
+  if (!fs.existsSync("data")) fs.mkdirSync("data");
 
   const payload = {
     updated_at: new Date().toISOString(),
-    images: imageData
+    images: imageData,
   };
 
-  fs.writeFileSync('data/images.json', JSON.stringify(payload, null, 2));
-
-  console.log(`총 ${imageData.length}개 이미지 업데이트 완료`);
+  fs.writeFileSync("data/images.json", JSON.stringify(payload, null, 2));
+  console.log(`총 ${imageData.length}개 이미지 저장 완료`);
 }
 
 fetchAllImages().catch(console.error);
+
