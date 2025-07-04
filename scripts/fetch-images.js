@@ -15,6 +15,7 @@ async function fetchAllImages() {
   do {
     const result = await cloudinary.search
       .expression("folder:coffee")
+      .with_field("image_metadata")
       .sort_by("created_at", "desc")
       .max_results(500)
       .next_cursor(nextCursor)
@@ -24,16 +25,25 @@ async function fetchAllImages() {
     nextCursor = result.next_cursor;
   } while (nextCursor);
 
-  // 필요한 정보만 추출
-  const imageData = allImages.map((img) => ({
-    public_id: img.public_id,
-    url: img.secure_url,
-    width: img.width,
-    height: img.height,
-    created_at: img.created_at,
-  }));
+  const imageData = allImages.map((img) => {
+    const takenAtRaw = img.image_metadata?.DateTime; // "2025:05:31 08:33:45"
+    let takenAt = null;
 
-  // data 폴더가 없으면 생성
+    if (takenAtRaw) {
+      // "2025:05:31 08:33:45" -> "2025-05-31T08:33:45"
+      takenAt = takenAtRaw.replace(/:/, '-').replace(/:/, '-').replace(" ", "T");
+    }
+
+    return {
+      public_id: img.public_id,
+      url: img.secure_url,
+      width: img.width,
+      height: img.height,
+      created_at: img.created_at,
+      taken_at: takenAt,
+    };
+  });
+
   if (!fs.existsSync("data")) {
     fs.mkdirSync("data");
   }
