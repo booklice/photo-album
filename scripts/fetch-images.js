@@ -1,4 +1,3 @@
-// scripts/fetch-images.js
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 
@@ -8,9 +7,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-async function fetchAllImages() {
+const getImages = async () => {
   let allImages = [];
-  let nextCursor = null;
+  let nextCursor = null; 
+  // cloudinary는 한번에 최대 500개의 데이터를 가져올 수 있어서
+  // 한번에 500개 가져오고 do - while 문을 이용해서, 다음 500개가 존재하면 또 가져온다.
 
   do {
     const result = await cloudinary.search
@@ -24,7 +25,7 @@ async function fetchAllImages() {
     nextCursor = result.next_cursor;
   } while (nextCursor);
 
-  // 필요한 정보만 추출
+  // 간단하게 추려지지 않은 allImages 데이터 중 필요한 값들만 뽑아준다.
   const imageData = allImages.map((img) => ({
     public_id: img.public_id,
     url: img.secure_url,
@@ -33,22 +34,14 @@ async function fetchAllImages() {
     created_at: img.created_at,
   }));
 
-  // data 폴더가 없으면 생성
-  if (!fs.existsSync("data")) {
-    fs.mkdirSync("data");
-  }
-
   const payload = {
     updated_at: new Date().toISOString(),
-    images: imageData
+    images: imageData,
   };
 
-  fs.writeFileSync('data/images.json', JSON.stringify(payload, null, 2));
+  fs.writeFileSync('images.json', JSON.stringify(payload, null, 2));
 
-  console.log(총 ${imageData.length}개 이미지 업데이트 완료);
-}
+  console.log(`총 ${imageData.length}개 이미지 업데이트 완료`);
+};
 
-fetchAllImages().catch(console.error);
-
-
-
+getImages().catch(console.error);
