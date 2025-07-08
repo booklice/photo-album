@@ -39,6 +39,12 @@ const getImages = async () => {
     images: imageData,
   };
 
+  // data 폴더가 없으면 생성
+  const dataDir = path.dirname("data/images.json");
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
   fs.writeFileSync("data/images.json", JSON.stringify(payload, null, 2));
 
   console.log(`총 ${imageData.length}개 이미지 업데이트 완료`);
