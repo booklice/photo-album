@@ -64,6 +64,7 @@
 
         const params = "w_200,q_30";
         newImg.src = images[i].url.replace("/upload/", `/upload/${params}/`);
+        newImg.setAttribute("loading", "lazy");
 
         newLi.appendChild(newImg);
         ul.appendChild(newLi);
