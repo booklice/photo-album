@@ -1,0 +1,42 @@
+name: Update Cloudinary Images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0,6,12,18 * * *" # 00:00 06:00 12:00 18:00
+
+permissions:
+  contents: write # ncessary for git push
+
+jobs:
+  update-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install cloudinary
+
+      - name: Fetch images from Cloudinary
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDNAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.API_SECRET }}
+        run: node scripts/fetch-images.js
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "contact@youngjo.com"
+          git config --local user.name "booklice"
+          if [ -f data/images.json ]; then
+            git add data/images.json
+            git diff --staged --quiet || git commit -m "Update images data"
+            git push
+          else
+            echo "WARNING! data/images.json not found, skipping commit."
+          fi
