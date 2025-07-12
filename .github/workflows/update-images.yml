@@ -24,7 +24,7 @@ jobs:
 
       - name: Fetch images from Cloudinary
         env:
-          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDNAME }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUD_NAME }}
           CLOUDINARY_API_KEY: ${{ secrets.API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.API_SECRET }}
         run: node scripts/fetch-images.js
