@@ -31,7 +31,7 @@ const getImages = async () => {
 
   // allImages 데이터 중 필요한 값들만 뽑아준다.
   const imageData = allImages.map((img) => {
-    console.log(img.taken_at);
+    console.log(img);
     return {
       public_id: img.public_id,
       url: img.secure_url,
