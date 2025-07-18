@@ -19,7 +19,7 @@ const getImages = async () => {
       .expression(`folder:${process.env.CLOUDINARY_FOLDER_NAME}`)
       .sort_by("created_at", "desc")
       .fields("image_metadata")
-      .fields("image_metadata.taken_at<1486910712")
+      .fields("taken_at<1486910712")
       .fields("secure_url")
       .max_results(500) // https://support.cloudinary.com/hc/en-us/articles/205712561-Why-am-I-only-getting-10-results-when-listing-my-resources
       .next_cursor(nextCursor)
