@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    ul {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      position: relative;
+      overflow: hidden;
+      /* 정방향 */
+      /* aspect-ratio: 1 / 1; */
+    }
+
+    li img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* fill | contain | cover | none | scale-down */
+    }
+  </style>
+  <body>
+    <main>
+      <ul></ul>
+    </main>
+  </body>
+  <script>
+    // 만약 스크립트 부분을 파일로 빼내고 싶다면..
+    // <script src="script.js" defer></\script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const getData = async () => {
+        const res = await fetch(`./data/images.json`);
+        const data = await res.json();
+        return data;
+      };
+
+      const { images } = await getData();
+
+      const ul = document.querySelector("ul");
+
+      for (let i = 0; i < images.length; i++) {
+        console.log("hi there");
+        const newLi = document.createElement("li");
+        const newImg = document.createElement("img");
+
+        const { url, taken_at } = images[i];
+        const takenAt = new Date(taken_at).getTime();
+        console.log(taken_at, takenAt);
+        const params = "w_200,q_30,f_auto";
+        newImg.src = url.replace("/upload/", `/upload/${params}/`);
+
+        newImg.setAttribute("loading", "lazy");
+        newImg.setAttribute("data-time", taken_at);
+
+        newLi.appendChild(newImg);
+        ul.appendChild(newLi);
+      }
+    });
+  </script>
+</html>

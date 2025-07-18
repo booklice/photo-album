@@ -1,0 +1,49 @@
+name: Cloudinary 이미지 업데이트
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Workflow 수동 작업 가능하게
+  schedule:
+    - cron: "0 0,6,12,18 * * *" # 하루 4회 실행: 00:00, 06:00, 12:00, 18:00 (UTC 기준)
+
+permissions:
+  contents: write
+
+jobs:
+  update-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Cloudinary 라이브러리 설치
+        run: npm install cloudinary
+
+      - name: Cloudinary에서 이미지 가져오기
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_FOLDER_NAME: ${{ secrets.CLOUDINARY_FOLDER_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: node scripts/fetch-images.js
+
+      - name: 변경사항 커밋 및 푸시
+        env:
+          GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+          GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+        run: |
+          git config --local user.email "$GIT_USER_EMAIL"
+          git config --local user.name "$GIT_USER_NAME"
+          if [ -f data/images.json ]; then
+            git add data/images.json
+            git diff --staged --quiet || git commit -m "데이터 업데이트"
+            git push
+          else
+            echo "어라? data/images.json 파일이 보이지 않아서 커밋을 중지합니다."
+          fi
