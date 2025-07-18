@@ -63,13 +63,18 @@
         const newImg = document.createElement("img");
 
         const { url, taken_at } = images[i];
-        const takenAt = new Date(taken_at).getTime();
-        console.log(taken_at, takenAt);
+        // taken_at = 2025:01:11 09:01:39
+        const iso = `${taken_at.split(" ")[0].replaceAll(":", "-")}T${
+          taken_at.split(" ")[1]
+        }`; // "2025-01-11T09:01:39"
+
+        const timestamp = new Date(iso).getTime(); // 1736586099000
+
         const params = "w_200,q_30,f_auto";
         newImg.src = url.replace("/upload/", `/upload/${params}/`);
 
         newImg.setAttribute("loading", "lazy");
-        newImg.setAttribute("data-time", taken_at);
+        newImg.setAttribute("data-time", new Date(timestamp).toLocaleString());
 
         newLi.appendChild(newImg);
         ul.appendChild(newLi);
