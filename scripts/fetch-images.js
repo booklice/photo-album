@@ -19,7 +19,6 @@ const getImages = async () => {
       .expression(`folder:${process.env.CLOUDINARY_FOLDER_NAME}`)
       .sort_by("created_at", "desc")
       .fields("image_metadata")
-      .fields("taken_at<1486910712")
       .fields("secure_url")
       .max_results(500) // https://support.cloudinary.com/hc/en-us/articles/205712561-Why-am-I-only-getting-10-results-when-listing-my-resources
       .next_cursor(nextCursor)
@@ -31,7 +30,6 @@ const getImages = async () => {
 
   // allImages 데이터 중 필요한 값들만 뽑아준다.
   const imageData = allImages.map((img) => {
-    console.log(img);
     return {
       public_id: img.public_id,
       url: img.secure_url,
@@ -39,7 +37,7 @@ const getImages = async () => {
       height: img.height,
       aspect_ratio: img.aspect_ratio,
       created_at: img.created_at,
-      taken_at: img.image_metadata.DateTimeOriginal || null, //
+      taken_at: img.image_metadata.DateTimeOriginal || null,
     };
   });
 
