@@ -1,0 +1,50 @@
+name: Cloudinary 이미지 업데이트
+
+on: # main 브랜치에 push 이벤트가 발생할 때 워크플로우가 실행
+  push:
+    branches:
+      - main
+  workflow_dispatch: # 대시보드에서 버튼 누르면 수동으로 실행
+  schedule:
+    - cron: "0 0,6,12,18 * * *" # 하루 4회 실행: 00:00, 06:00, 12:00, 18:00 (UTC 기준) -> kst 03:00, 09:00, 15:00, 21:00
+
+permissions:
+  contents: write # 리파지토리 쓰기 권한을 가짐
+
+jobs:
+  update-images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3 # checkout을 안 하면 워크플로우 안에서 내 리포지토리의 파일들에 접근할 수 없음
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # 제일 안정적임
+
+      - name: Cloudinary 라이브러리 설치
+        run: npm install cloudinary
+
+      - name: Cloudinary에서 이미지 가져오기
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_FOLDER_NAME: ${{ secrets.CLOUDINARY_FOLDER_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: node scripts/fetch-images.js
+
+      - name: 변경사항 커밋 및 푸시
+        env:
+          GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+          GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+        run: |
+          git config --local user.email "$GIT_USER_EMAIL"
+          git config --local user.name "$GIT_USER_NAME"
+
+          if [ -f data/images.json ]; then
+            git add data/images.json
+            git diff --staged --quiet || git commit -m "데이터 업데이트"
+            git push
+          else
+            echo "어라? data/images.json 파일이 없어서 커밋을 중지합니다."
+          fi
